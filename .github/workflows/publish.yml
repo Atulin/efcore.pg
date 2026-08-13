@@ -3,7 +3,10 @@ name: Publish to NuGet
 on:
   workflow_dispatch:
   push:
-    branches: [master]
+    branches: [master, main]
+
+env:
+  CSPROJ_FILE: ./src/EFCore.PG/EFCore.PG.csproj
 
 jobs:
   publish:
@@ -24,19 +27,19 @@ jobs:
           dotnet-quality: preview
 
       - name: Restore dependencies
-        run: dotnet restore
+        run: dotnet restore --project ${{ env.CSPROJ_FILE }}
 
       - name: Build
-        run: dotnet build --project ./src/EFCore.PG/EFCore.PG.csproj -c Release --no-restore
+        run: dotnet build --project ${{ env.CSPROJ_FILE }} -c Release --no-restore
 
       - name: Read version
         run: |
-          RAW=$(xmllint --xpath "string(//PropertyGroup/EFCoreVersion)" ./src/EFCore.PG/EFCore.PG.csproj)
+          RAW=$(xmllint --xpath "string(//PropertyGroup/EFCoreVersion)" ${{ env.CSPROJ_FILE }})
           echo "EF_VERSION=$RAW" >> $GITHUB_ENV
 
       - name: Package
-        run: | 
-          dotnet pack ./src/EFCore.PG/EFCore.PG.csproj \
+        run: |
+          dotnet pack ${{ env.CSPROJ_FILE }} \
           --configuration Release \
           --version-suffix "impatient" \
           -o ./nupkg \
