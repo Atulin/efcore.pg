@@ -34,7 +34,7 @@ jobs:
 
       - name: Read version
         run: |
-          RAW=$(xmllint --xpath "string(//PropertyGroup/EFCoreVersion)" ${{ env.CSPROJ_FILE }})
+          RAW=$(xmllint --xpath "string(//PropertyGroup/EFCoreVersion)" ./Directory.Packages.props)
           echo "EF_VERSION=$RAW" >> $GITHUB_ENV
 
       - name: Package
