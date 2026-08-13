@@ -36,6 +36,10 @@ jobs:
         run: |
           RAW=$(xmllint --xpath "string(//PropertyGroup/EFCoreVersion)" ./Directory.Packages.props)
           echo "EF_VERSION=$RAW" >> $GITHUB_ENV
+          
+      - name: Read tag
+        id: read_tag
+        run: echo "tag=${GITHUB_REF_NAME}" >> $GITHUB_OUTPUT
 
       - name: Package
         run: |
@@ -45,7 +49,7 @@ jobs:
           --no-build \
           -p:ContinuousIntegrationBuild=true \
           -p:PackageId=Npgsql.EntityFrameworkCore.PostgreSQL.Impatient \
-          -p:PackageVersion=${{ env.EF_VERSION }}${{ GITHUB_REF_NAME }}
+          -p:PackageVersion=${{ env.EF_VERSION }}${{ steps.read_tag.outputs.tag }}
 
       - name: NuGet login
         uses: NuGet/login@v1
