@@ -45,7 +45,7 @@ jobs:
           --no-build \
           -p:ContinuousIntegrationBuild=true \
           -p:PackageId=Npgsql.EntityFrameworkCore.PostgreSQL.Impatient \
-          -p:PackageVersion=${{ env.EF_VERSION }}
+          -p:PackageVersion=${{ env.EF_VERSION }}${{ GITHUB_REF_NAME }}
 
       - name: NuGet login
         uses: NuGet/login@v1
