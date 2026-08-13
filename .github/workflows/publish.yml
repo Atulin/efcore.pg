@@ -26,11 +26,8 @@ jobs:
           dotnet-version: latest
           dotnet-quality: preview
 
-      - name: Restore dependencies
-        run: dotnet restore --project ${{ env.CSPROJ_FILE }}
-
       - name: Build
-        run: dotnet build --project ${{ env.CSPROJ_FILE }} -c Release --no-restore
+        run: dotnet build --project ${{ env.CSPROJ_FILE }} -c Release
 
       - name: Read version
         run: |
