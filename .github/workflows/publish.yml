@@ -1,0 +1,54 @@
+name: Publish to NuGet
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [master]
+
+jobs:
+  publish:
+    name: Build and Publish
+    runs-on: ubuntu-latest
+
+    permissions:
+      id-token: write
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: latest
+          dotnet-quality: preview
+
+      - name: Restore dependencies
+        run: dotnet restore
+
+      - name: Build
+        run: dotnet build --project ./src/EFCore.PG/EFCore.PG.csproj -c Release --no-restore
+
+      - name: Read version
+        run: |
+          RAW=$(xmllint --xpath "string(//PropertyGroup/EFCoreVersion)" ./src/EFCore.PG/EFCore.PG.csproj)
+          echo "EF_VERSION=$RAW" >> $GITHUB_ENV
+
+      - name: Package
+        run: | 
+          dotnet pack ./src/EFCore.PG/EFCore.PG.csproj \
+          --configuration Release \
+          --version-suffix "impatient" \
+          -o ./nupkg \
+          --no-build \
+          -p:ContinuousIntegrationBuild=true \
+          -p:PackageVersion=${{ env.EF_VERSION }}
+
+      - name: NuGet login
+        uses: NuGet/login@v1
+        id: login
+        with:
+          user: ${{ secrets.NUGET_USER }}
+
+      - name: Push to NuGet
+        run: dotnet nuget push ./nupkg/*.nupkg --api-key ${{ steps.login.outputs.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json --skip-duplicate
