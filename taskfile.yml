@@ -1,0 +1,10 @@
+version: '3'
+
+tasks:
+  release:
+    vars:
+      NUGET_API_KEY:
+        sh: gh auth token
+    cmds:
+      - dotnet pack src/EFCore.PG/EFCore.PG.csproj --configuration Release --version-suffix "impatient" -p:ContinuousIntegrationBuild=true --output ./nupkgs
+      - dotnet nuget push ./nupkgs/*.nupkg -k {{.NUGET_API_KEY}} -s https://nuget.pkg.github.com/Atulin/index.json
